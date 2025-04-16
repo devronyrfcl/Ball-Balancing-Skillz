@@ -16,6 +16,12 @@ public class BallController : MonoBehaviour
     public Transform cameraTransform; // Reference to the camera
     public float cameraTiltSpeed = 5f; // Speed at which the camera will tilt
 
+    public GameObject[] Background_Platform_Object; // Array of platform objects that will tilt
+
+    public float platformTiltAmountX = 5f; // Tilt amount for X axis
+    public float platformTiltAmountZ = 5f; // Tilt amount for Z axis
+    public float platformTiltSpeed = 5f;   // Speed of platform tilt
+
     private void Start()
     {
         // Get the Rigidbody component attached to the ball
@@ -31,7 +37,10 @@ public class BallController : MonoBehaviour
         MoveBall();
 
         // Adjust the camera tilt based on joystick input
-        AdjustCameraTilt();
+        //AdjustCameraTilt();
+
+        // Tilt the background platform objects based on joystick input
+        TiltBackgroundPlatforms();
     }
 
     private void MoveBall()
@@ -67,7 +76,7 @@ public class BallController : MonoBehaviour
         }
     }
 
-    private void AdjustCameraTilt()
+    /*private void AdjustCameraTilt()
     {
         // Get the joystick input
         float horizontalInput = joystick.Horizontal;
@@ -90,15 +99,54 @@ public class BallController : MonoBehaviour
         // Left (horizontalInput < 0) => Z angle = -5, Right (horizontalInput > 0) => Z angle = +5
         if (horizontalInput < -0.1f)
         {
-            targetZAngle = -5f; // Moving left
+            targetZAngle = -0f; // Moving left
         }
         else if (horizontalInput > 0.1f)
         {
-            targetZAngle = 5f; // Moving right
+            targetZAngle = 0f; // Moving right
         }
 
         // Smoothly rotate the camera to the target angles
         Quaternion targetRotation = Quaternion.Euler(targetXAngle, cameraTransform.eulerAngles.y, targetZAngle);
         cameraTransform.rotation = Quaternion.Slerp(cameraTransform.rotation, targetRotation, Time.deltaTime * cameraTiltSpeed);
+    }*/
+
+    private void TiltBackgroundPlatforms()
+    {
+        // Get the joystick input
+        float horizontalInput = joystick.Horizontal;
+        float verticalInput = joystick.Vertical;
+
+        // Calculate the target tilt angles for the platforms based on joystick input
+        float targetXAngle = 0f;
+        float targetZAngle = 0f;
+
+        // Apply tilt on the X axis (forward/backward)
+        if (verticalInput > 0.1f) // Moving forward
+        {
+            targetXAngle = platformTiltAmountX; // Tilt forward
+        }
+        else if (verticalInput < -0.1f) // Moving backward
+        {
+            targetXAngle = -platformTiltAmountX; // Tilt backward
+        }
+
+        // Apply tilt on the Z axis (left/right)
+        if (horizontalInput > 0.1f) // Moving right
+        {
+            targetZAngle = platformTiltAmountZ; // Tilt right
+        }
+        else if (horizontalInput < -0.1f) // Moving left
+        {
+            targetZAngle = -platformTiltAmountZ; // Tilt left
+        }
+
+        // Apply the tilt to each platform in the array
+        foreach (GameObject platform in Background_Platform_Object)
+        {
+            // Smoothly rotate the platform to the target tilt
+            Quaternion targetRotation = Quaternion.Euler(targetXAngle, platform.transform.eulerAngles.y, targetZAngle);
+            platform.transform.rotation = Quaternion.Slerp(platform.transform.rotation, targetRotation, Time.deltaTime * platformTiltSpeed);
+        }
     }
 }
